@@ -1,0 +1,178 @@
+<Window x:Class="ShortcutUI.DesignWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Shortcut UI — デザイン設定" Icon="/Assets/app.ico" Width="860" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="True" Topmost="True"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI Variable Text, Yu Gothic UI, Segoe UI" FontSize="13"
+        Foreground="#EDEFF7" TextOptions.TextFormattingMode="Display">
+    <Border x:Name="Root" Margin="18" CornerRadius="18" Background="#F7161821"
+            BorderBrush="#2AFFFFFF" BorderThickness="1" Padding="26,22,26,24">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="34" ShadowDepth="10" Direction="270" Opacity="0.55" Color="Black"/>
+        </Border.Effect>
+        <StackPanel>
+            <!-- ヘッダー -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Width="34" Height="34" CornerRadius="10" Background="{StaticResource Accent}" VerticalAlignment="Center">
+                    <TextBlock FontFamily="{StaticResource IconFont}" FontSize="16" Foreground="White"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" Text="&#xE790;"/>
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="デザイン設定" FontSize="15" FontWeight="SemiBold"/>
+                    <TextBlock Text="サークルの色・大きさ・透け方・動きを変更できます" FontSize="11.5" Foreground="#8E96AA" Margin="0,2,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="2" Style="{StaticResource GhostBtn}" Padding="8" Click="OnCancel" VerticalAlignment="Top" ToolTip="閉じる">
+                    <TextBlock FontFamily="{StaticResource IconFont}" FontSize="11" Text="&#xE711;" Foreground="#AEB5C6"/>
+                </Button>
+            </Grid>
+
+            <Grid Margin="0,20,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="330"/>
+                    <ColumnDefinition Width="26"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- プレビュー -->
+                <StackPanel>
+                    <Border x:Name="PreviewFrame" Width="330" Height="330" CornerRadius="14" ClipToBounds="True"
+                            BorderBrush="#1CFFFFFF" BorderThickness="1">
+                        <Viewbox>
+                            <Grid x:Name="PreviewHost" Width="540" Height="540"/>
+                        </Viewbox>
+                    </Border>
+                    <Grid Margin="0,10,0,0">
+                        <Border CornerRadius="9" Background="#0CFFFFFF" BorderBrush="#16FFFFFF" BorderThickness="1" Padding="3" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="BgDark" GroupName="Bg" Style="{StaticResource Seg}" Content="暗い背景" IsChecked="True" Checked="OnBgChanged"/>
+                                <RadioButton x:Name="BgLight" GroupName="Bg" Style="{StaticResource Seg}" Content="明るい背景" Checked="OnBgChanged"/>
+                            </StackPanel>
+                        </Border>
+                        <Button Style="{StaticResource Btn}" HorizontalAlignment="Right" Padding="12,7" Click="OnReplay">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE768;" Margin="0,1,7,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="展開を再生"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+
+                <!-- 設定項目 -->
+                <StackPanel Grid.Column="2">
+                    <TextBlock Style="{StaticResource Label}" Text="スタイル" Margin="2,0,0,7"/>
+                    <Border CornerRadius="9" Background="#0CFFFFFF" BorderBrush="#16FFFFFF" BorderThickness="1" Padding="3" Margin="0,0,0,14">
+                        <UniformGrid Columns="2">
+                            <RadioButton x:Name="StyleStandard" GroupName="Style" Style="{StaticResource Seg}" Checked="OnOptionChanged">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA3A;" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="スタンダード"/>
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton x:Name="StyleMagic" GroupName="Style" Style="{StaticResource Seg}" Checked="OnOptionChanged">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE945;" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="魔法陣"/>
+                                </StackPanel>
+                            </RadioButton>
+                        </UniformGrid>
+                    </Border>
+                    <TextBlock Style="{StaticResource Label}" Text="テーマ" Margin="2,0,0,8"/>
+                    <WrapPanel x:Name="ThemePanel"/>
+
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource Label}" Text="アクセントカラー 1" Margin="2,6,0,7"/>
+                            <DockPanel>
+                                <Border x:Name="SwatchA" DockPanel.Dock="Left" Width="34" CornerRadius="8" Margin="0,0,6,0" BorderBrush="#30FFFFFF" BorderThickness="1"/>
+                                <TextBox x:Name="AccentABox" TextChanged="OnAccentChanged"/>
+                            </DockPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Style="{StaticResource Label}" Text="アクセントカラー 2" Margin="2,6,0,7"/>
+                            <DockPanel>
+                                <Border x:Name="SwatchB" DockPanel.Dock="Left" Width="34" CornerRadius="8" Margin="0,0,6,0" BorderBrush="#30FFFFFF" BorderThickness="1"/>
+                                <TextBox x:Name="AccentBBox" TextChanged="OnAccentChanged"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource Label}" Text="区画の色"/>
+                            <Border CornerRadius="9" Background="#0CFFFFFF" BorderBrush="#16FFFFFF" BorderThickness="1" Padding="3">
+                                <UniformGrid Columns="2">
+                                    <RadioButton x:Name="SegDark" GroupName="SegStyle" Style="{StaticResource Seg}" Content="ダーク" Checked="OnOptionChanged"/>
+                                    <RadioButton x:Name="SegLight" GroupName="SegStyle" Style="{StaticResource Seg}" Content="ライト" Checked="OnOptionChanged"/>
+                                </UniformGrid>
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Style="{StaticResource Label}" Text="ラベル"/>
+                            <Border CornerRadius="9" Background="#0CFFFFFF" BorderBrush="#16FFFFFF" BorderThickness="1" Padding="3">
+                                <UniformGrid Columns="2">
+                                    <RadioButton x:Name="LabelsOn" GroupName="Labels" Style="{StaticResource Seg}" Content="表示" Checked="OnOptionChanged"/>
+                                    <RadioButton x:Name="LabelsOff" GroupName="Labels" Style="{StaticResource Seg}" Content="アイコンのみ" Checked="OnOptionChanged"/>
+                                </UniformGrid>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+
+                    <DockPanel Margin="0,16,0,0">
+                        <TextBlock x:Name="SizeValue" DockPanel.Dock="Right" Foreground="#C9CEDB" FontSize="12"/>
+                        <TextBlock Text="大きさ" Foreground="#8E96AA" FontSize="11.5" Margin="2,0,0,0"/>
+                    </DockPanel>
+                    <Slider x:Name="SizeSlider" Minimum="0.8" Maximum="1.25" SmallChange="0.05" LargeChange="0.05" ValueChanged="OnSliderChanged"/>
+
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock x:Name="OpacityValue" DockPanel.Dock="Right" Foreground="#C9CEDB" FontSize="12"/>
+                        <TextBlock Text="区画の不透明度" Foreground="#8E96AA" FontSize="11.5" Margin="2,0,0,0"/>
+                    </DockPanel>
+                    <Slider x:Name="OpacitySlider" Minimum="0.4" Maximum="1" SmallChange="0.05" LargeChange="0.05" ValueChanged="OnSliderChanged"/>
+
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock x:Name="FadeValue" DockPanel.Dock="Right" Foreground="#C9CEDB" FontSize="12"/>
+                        <TextBlock Text="カーソルから離れたときの透け方" Foreground="#8E96AA" FontSize="11.5" Margin="2,0,0,0"/>
+                    </DockPanel>
+                    <Slider x:Name="FadeSlider" Minimum="200" Maximum="600" SmallChange="10" LargeChange="20" ValueChanged="OnSliderChanged"/>
+
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock x:Name="SpeedValue" DockPanel.Dock="Right" Foreground="#C9CEDB" FontSize="12"/>
+                        <TextBlock Text="アニメーションの速さ" Foreground="#8E96AA" FontSize="11.5" Margin="2,0,0,0"/>
+                    </DockPanel>
+                    <Slider x:Name="SpeedSlider" Minimum="0.5" Maximum="2" SmallChange="0.1" LargeChange="0.1" ValueChanged="OnSliderChanged"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- フッター -->
+            <Grid Margin="0,24,0,0">
+                <Button Style="{StaticResource GhostBtn}" HorizontalAlignment="Left" Padding="10,8" Click="OnReset">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE777;" Foreground="#AEB5C6" Margin="0,1,7,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="デフォルトに戻す" Foreground="#AEB5C6"/>
+                    </StackPanel>
+                </Button>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource Btn}" Content="キャンセル" Click="OnCancel" Margin="0,0,8,0"/>
+                    <Button Style="{StaticResource PrimaryBtn}" Content="保存" Click="OnSave" MinWidth="84"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

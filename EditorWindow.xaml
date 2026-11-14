@@ -1,0 +1,113 @@
+<Window x:Class="ShortcutUI.EditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ショートカットの割り当て" Width="460" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" Opacity="0"
+        WindowStartupLocation="Manual" Left="-20000" Top="-20000"
+        FontFamily="Segoe UI Variable Text, Yu Gothic UI, Segoe UI" FontSize="13"
+        Foreground="#EDEFF7" TextOptions.TextFormattingMode="Display">
+
+    <Border x:Name="Root" Margin="18" CornerRadius="16" Background="#F5161821"
+            BorderBrush="#2AFFFFFF" BorderThickness="1" Padding="24,20,24,22">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="30" ShadowDepth="8" Direction="270" Opacity="0.55" Color="Black"/>
+        </Border.Effect>
+        <StackPanel>
+            <!-- ヘッダー -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Width="34" Height="34" CornerRadius="10" Background="{StaticResource Accent}" VerticalAlignment="Center">
+                    <TextBlock x:Name="HeaderGlyph" FontFamily="{StaticResource IconFont}" FontSize="16" Foreground="White"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" Text="&#xE70F;"/>
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="ショートカットの割り当て" FontSize="15" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="SubTitle" Text="ページ 1 · 区画 1" FontSize="11.5" Foreground="#8E96AA" Margin="0,2,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="2" Style="{StaticResource GhostBtn}" Padding="8" Click="OnCancel" VerticalAlignment="Top" ToolTip="閉じる">
+                    <TextBlock FontFamily="{StaticResource IconFont}" FontSize="11" Text="&#xE711;" Foreground="#AEB5C6"/>
+                </Button>
+            </Grid>
+
+            <TextBlock Style="{StaticResource Label}" Text="表示名"/>
+            <TextBox x:Name="NameBox"/>
+
+            <TextBlock Style="{StaticResource Label}" Text="動作"/>
+            <Border CornerRadius="10" Background="#0CFFFFFF" BorderBrush="#16FFFFFF" BorderThickness="1" Padding="3">
+                <UniformGrid Columns="2">
+                    <RadioButton x:Name="KindKeys" GroupName="Kind" Style="{StaticResource Seg}" Checked="OnKindChanged">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE765;" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="キー操作"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton x:Name="KindLaunch" GroupName="Kind" Style="{StaticResource Seg}" Checked="OnKindChanged">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE8A7;" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="アプリ / ファイル / URL"/>
+                        </StackPanel>
+                    </RadioButton>
+                </UniformGrid>
+            </Border>
+
+            <!-- キー操作 -->
+            <StackPanel x:Name="KeysPanel">
+                <TextBlock Style="{StaticResource Label}" Text="キーの組み合わせ（右の欄をクリックしてキーを押す）"/>
+                <DockPanel>
+                    <ToggleButton x:Name="ModWin" Content="Win" Style="{StaticResource Mod}" Click="OnModClick"/>
+                    <ToggleButton x:Name="ModCtrl" Content="Ctrl" Style="{StaticResource Mod}" Click="OnModClick"/>
+                    <ToggleButton x:Name="ModShift" Content="Shift" Style="{StaticResource Mod}" Click="OnModClick"/>
+                    <ToggleButton x:Name="ModAlt" Content="Alt" Style="{StaticResource Mod}" Click="OnModClick"/>
+                    <TextBox x:Name="KeyBox" IsReadOnly="True" IsReadOnlyCaretVisible="False" Cursor="Hand"
+                             PreviewKeyDown="OnKeyBoxKeyDown" HorizontalContentAlignment="Center"
+                             InputMethod.IsInputMethodEnabled="False"/>
+                </DockPanel>
+                <Border Margin="0,10,0,0" CornerRadius="8" Background="#0AFFFFFF" Padding="12,9">
+                    <TextBlock x:Name="ComboPreview" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center"
+                               Foreground="#9FB4FF" Text="—"/>
+                </Border>
+                <TextBlock Style="{StaticResource Label}" Text="よく使うショートカット"/>
+                <WrapPanel x:Name="KeyPresets"/>
+            </StackPanel>
+
+            <!-- 起動 -->
+            <StackPanel x:Name="LaunchPanel">
+                <TextBlock Style="{StaticResource Label}" Text="対象（アプリ・ファイル・フォルダのパス、または URL）"/>
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Style="{StaticResource Btn}" Padding="12,8" Margin="6,0,0,0" Click="OnBrowseFolder" ToolTip="フォルダを選択">
+                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE8B7;"/>
+                    </Button>
+                    <Button DockPanel.Dock="Right" Style="{StaticResource Btn}" Padding="12,8" Margin="6,0,0,0" Click="OnBrowseFile" ToolTip="ファイルを選択">
+                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE8E5;"/>
+                    </Button>
+                    <TextBox x:Name="TargetBox" TextChanged="OnTargetChanged"/>
+                </DockPanel>
+                <TextBlock Style="{StaticResource Label}" Text="引数（任意）"/>
+                <TextBox x:Name="ArgsBox"/>
+                <TextBlock Style="{StaticResource Label}" Text="プリセット"/>
+                <WrapPanel x:Name="LaunchPresets"/>
+            </StackPanel>
+
+            <TextBlock x:Name="ErrorText" Foreground="#FF8A9A" FontSize="12" Margin="2,12,0,0" Visibility="Collapsed" TextWrapping="Wrap"/>
+
+            <!-- フッター -->
+            <Grid Margin="0,22,0,0">
+                <Button x:Name="ClearButton" Style="{StaticResource GhostBtn}" HorizontalAlignment="Left" Padding="10,8" Click="OnClear">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE74D;" Foreground="#FF8A9A" Margin="0,1,7,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="割り当てを解除" Foreground="#FF8A9A"/>
+                    </StackPanel>
+                </Button>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource Btn}" Content="キャンセル" Click="OnCancel" Margin="0,0,8,0"/>
+                    <Button Style="{StaticResource PrimaryBtn}" Content="保存" Click="OnSave" MinWidth="84"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>
