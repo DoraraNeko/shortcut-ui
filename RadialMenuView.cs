@@ -336,18 +336,24 @@ internal sealed partial class RadialMenuView : FrameworkElement
         // ページインジケーター
         double t = Ease.InOutCubic(PageT);
         double PillW(int p) => p == Page ? Ease.Lerp(5, 15, t) : (p == PrevPage && PageT < 1 ? Ease.Lerp(15, 5, t) : 5);
-        double w0 = PillW(0), w1 = PillW(1), gap = 4;
-        double x = c.X - (w0 + gap + w1) / 2, y = c.Y + 11;
-        DrawPill(dc, x, y, w0);
-        DrawPill(dc, x + w0 + gap, y, w1);
+        int n = Config?.Pages.Count ?? 1;
+        // ページが多いときは中央の円に収まるよう縮める
+        double fit = Math.Min(1, 58 / (15 + 9.0 * (n - 1)));
+        double gap = 4 * fit, total = (15 + 5 * (n - 1)) * fit + gap * (n - 1);
+        double x = c.X - total / 2, y = c.Y + 11;
+        for (int p = 0; p < n; p++)
+        {
+            double w = PillW(p);
+            DrawPill(dc, x, y, w * fit, Ease.Clamp01((w - 5) / 10), Math.Max(3, 5 * fit));
+            x += w * fit + gap;
+        }
         dc.Pop();
     }
 
-    void DrawPill(DrawingContext dc, double x, double y, double w)
+    void DrawPill(DrawingContext dc, double x, double y, double w, double k, double h)
     {
-        double k = Ease.Clamp01((w - 5) / 10);
         var col = Lerp(WithA(TextBase, 80), WithA(AccentB, 255), k);
-        dc.DrawRoundedRectangle(new SolidColorBrush(col), null, new Rect(x, y - 2.5, w, 5), 2.5, 2.5);
+        dc.DrawRoundedRectangle(new SolidColorBrush(col), null, new Rect(x, y - h / 2, w, h), h / 2, h / 2);
     }
 
     void DrawRipple(DrawingContext dc, Point c)
@@ -363,7 +369,7 @@ internal sealed partial class RadialMenuView : FrameworkElement
     void DrawPinnedChrome(DrawingContext dc, Point c)
     {
         double a = PinT;
-        var title = Text($"ページ {Page + 1} / {AppConfig.PageCount}", 12, TextA(0.92 * a), TextFace);
+        var title = Text($"ページ {Page + 1} / {Config?.Pages.Count ?? 1}", 12, TextA(0.92 * a), TextFace);
         DrawChip(dc, title, new Point(c.X, c.Y - OuterR - PopOut - 30), a);
 
         var hint = Text("クリックで実行  ·  右クリックで編集  ·  ホイールでページ切替  ·  中央で閉じる", 11, TextA(0.68 * a), TextFace);

@@ -59,7 +59,10 @@ public sealed class Slot
 
 public sealed class AppConfig
 {
-    public const int PageCount = 2;
+    /// <summary>新規作成時のページ数。</summary>
+    public const int DefaultPageCount = 3;
+    /// <summary>追加できるページ数の上限。</summary>
+    public const int MaxPageCount = 12;
     public const int SlotsPerPage = 8;
 
     /// <summary>メニューが開くまでの長押し時間（ミリ秒）。</summary>
@@ -112,9 +115,10 @@ public sealed class AppConfig
     void Normalize()
     {
         Pages ??= new();
-        while (Pages.Count < PageCount) Pages.Add(new());
-        if (Pages.Count > PageCount) Pages.RemoveRange(PageCount, Pages.Count - PageCount);
-        for (int p = 0; p < PageCount; p++)
+        Pages.RemoveAll(p => p == null);
+        if (Pages.Count == 0) Pages.Add(new());
+        if (Pages.Count > MaxPageCount) Pages.RemoveRange(MaxPageCount, Pages.Count - MaxPageCount);
+        for (int p = 0; p < Pages.Count; p++)
         {
             Pages[p] ??= new();
             for (int i = 0; i < Pages[p].Count; i++) Pages[p][i] ??= new Slot();
@@ -147,14 +151,26 @@ public sealed class AppConfig
                 },
             },
         };
+        while (cfg.Pages.Count < DefaultPageCount) cfg.Pages.Add(new());
         cfg.Normalize();
         return cfg;
+    }
+
+    /// <summary>空のページを末尾に追加する。上限に達していれば false。</summary>
+    public bool AddPage()
+    {
+        if (Pages.Count >= MaxPageCount) return false;
+        var page = new List<Slot>();
+        for (int i = 0; i < SlotsPerPage; i++) page.Add(new Slot());
+        Pages.Add(page);
+        return true;
     }
 
     /// <summary>初期状態: すべての区画が空。</summary>
     public static AppConfig CreateDefault()
     {
         var cfg = new AppConfig();
+        while (cfg.Pages.Count < DefaultPageCount) cfg.Pages.Add(new());
         cfg.Normalize();
         return cfg;
     }

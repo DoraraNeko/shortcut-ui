@@ -75,6 +75,15 @@ public partial class App : System.Windows.Application
         cms.Items.Add("ショートカットを編集", null, (_, _) => OpenEditor());
         cms.Items.Add("デザイン設定…", null, (_, _) => OpenDesign());
 
+        var addPage = new WinForms.ToolStripMenuItem("ページを追加");
+        addPage.Click += (_, _) => AddPage();
+        cms.Items.Add(addPage);
+        cms.Opening += (_, _) =>
+        {
+            addPage.Text = $"ページを追加（現在 {config.Pages.Count} ページ）";
+            addPage.Enabled = config.Pages.Count < AppConfig.MaxPageCount;
+        };
+
         var pause = new WinForms.ToolStripMenuItem("一時停止") { CheckOnClick = true };
         pause.CheckedChanged += (_, _) => { if (gesture != null) gesture.Paused = pause.Checked; };
         cms.Items.Add(pause);
@@ -99,6 +108,19 @@ public partial class App : System.Windows.Application
         tray.MouseDoubleClick += (_, _) => OpenEditor();
         tray.ShowBalloonTip(3500, "Shortcut UI",
             "デスクトップを長押しするとメニューが開きます。中央で離すと編集モードになります。",
+            WinForms.ToolTipIcon.None);
+    }
+
+    void AddPage()
+    {
+        if (!config.AddPage())
+        {
+            tray?.ShowBalloonTip(3000, "Shortcut UI", $"ページは最大 {AppConfig.MaxPageCount} ページまでです。", WinForms.ToolTipIcon.Info);
+            return;
+        }
+        config.Save();
+        tray?.ShowBalloonTip(3000, "Shortcut UI",
+            $"ページ {config.Pages.Count} を追加しました。メニューを開いてホイールで切り替え、区画を右クリックして割り当てられます。",
             WinForms.ToolTipIcon.None);
     }
 

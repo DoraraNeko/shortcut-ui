@@ -91,7 +91,9 @@ internal sealed class RadialMenuWindow : Window
     {
         if (mode is not (Mode.Gesture or Mode.Pinned)) return;
         view.PrevPage = view.Page;
-        view.Page = ((view.Page + dir) % AppConfig.PageCount + AppConfig.PageCount) % AppConfig.PageCount;
+        int n = config.Pages.Count;
+        if (n <= 1) return;
+        view.Page = ((view.Page + dir) % n + n) % n;
         view.PageDir = dir >= 0 ? 1 : -1;
         view.PageT = 0;
         pageStart = Now;
