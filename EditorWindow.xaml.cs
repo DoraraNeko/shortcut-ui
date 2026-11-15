@@ -19,6 +19,8 @@ public partial class EditorWindow : Window
     Key capturedKey = Key.None;
     string glyph;
     bool suppressGlyphReset;
+    /// <summary>最後に自動で入れた表示名。表示名がこれと同じ（または空）の間は自動更新を続ける。</summary>
+    string lastAutoName = "";
 
     static readonly (string Name, string Keys)[] KeyPresetList =
     {
@@ -72,6 +74,8 @@ public partial class EditorWindow : Window
         ModAlt.IsChecked = combo.Alt;
         capturedKey = combo.Key;
 
+        // 既存の表示名が自動の名前と同じなら、パスを変えたときに追従させる
+        if (slot.Kind == SlotKind.Launch) lastAutoName = Slot.AutoName(slot.Target);
         suppressGlyphReset = true;
         TargetBox.Text = slot.Target;
         suppressGlyphReset = false;
@@ -167,6 +171,17 @@ public partial class EditorWindow : Window
     void OnTargetChanged(object sender, TextChangedEventArgs e)
     {
         if (!suppressGlyphReset) glyph = "";
+        if (NameBox == null) return;
+
+        // 表示名が空か、前回自動で入れた名前のままなら、ファイル名（拡張子なし）で更新する。
+        // ユーザーが表示名を書き換えた後は上書きしない（空にすると自動に戻る）。
+        var current = NameBox.Text.Trim();
+        if (current.Length == 0 || current == lastAutoName)
+        {
+            var auto = Slot.AutoName(TargetBox.Text);
+            NameBox.Text = auto;
+            lastAutoName = auto;
+        }
     }
 
     void ApplyKeyPreset(string name, string keys)
@@ -179,16 +194,19 @@ public partial class EditorWindow : Window
         capturedKey = c.Key;
         glyph = "";
         NameBox.Text = name;
+        lastAutoName = name;   // プリセット名は自動の名前として扱う
         UpdatePreview();
     }
 
     void ApplyLaunchPreset(string name, string target, string args, string g)
     {
+        NameBox.Text = "";   // 自動入力を許可してからパスを入れ、プリセット名で上書きする
         suppressGlyphReset = true;
         TargetBox.Text = target;
         suppressGlyphReset = false;
         ArgsBox.Text = args;
         NameBox.Text = name;
+        lastAutoName = name;  // プリセット名も「自動の名前」として扱い、パス変更時は追従させる
         glyph = g;
     }
 
@@ -217,21 +235,13 @@ public partial class EditorWindow : Window
             Filter = "すべてのファイル (*.*)|*.*|アプリケーション (*.exe;*.lnk;*.bat;*.cmd)|*.exe;*.lnk;*.bat;*.cmd",
             DereferenceLinks = false,
         };
-        if (dlg.ShowDialog(this) == true)
-        {
-            TargetBox.Text = dlg.FileName;
-            if (string.IsNullOrWhiteSpace(NameBox.Text)) NameBox.Text = Slot.AutoName(dlg.FileName);
-        }
+        if (dlg.ShowDialog(this) == true) TargetBox.Text = dlg.FileName;   // 表示名は OnTargetChanged で自動入力
     }
 
     void OnBrowseFolder(object sender, RoutedEventArgs e)
     {
         var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "開くフォルダを選択" };
-        if (dlg.ShowDialog(this) == true)
-        {
-            TargetBox.Text = dlg.FolderName;
-            if (string.IsNullOrWhiteSpace(NameBox.Text)) NameBox.Text = Path.GetFileName(dlg.FolderName.TrimEnd('\\'));
-        }
+        if (dlg.ShowDialog(this) == true) TargetBox.Text = dlg.FolderName;   // 表示名は OnTargetChanged で自動入力
     }
 
     void OnWindowKeyDown(object sender, KeyEventArgs e)
